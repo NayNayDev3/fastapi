@@ -2,7 +2,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pymongo import MongoClient
 
-client = MongoClient("mongodb+srv://tonybalogny69:LQv93WjBC0hbXj7a@mythcity.kcmvkv5.mongodb.net/")
+client = MongoClient("mongodb+srv://basicUser:fO2yUzuLrcnbxOyW@mythcity.kcmvkv5.mongodb.net/")
+
 app = FastAPI()
 
 app.add_middleware(
@@ -10,89 +11,14 @@ app.add_middleware(
     allow_origins=["*"],
 )
 operaDB = client.test
-rewardsPaidCollection = operaDB.rewardpaids
-ethBorrowedCollection = operaDB.ethborroweds
-ethLentCollection = operaDB.ethlents
-ethWithdrawnCollection = operaDB.ethwithdrawns
-queueAddedCollection = operaDB.queueaddeds
-rewardsRecievedCollection = operaDB.rewardrecieveds
 tokensDeployedCollection = operaDB.tokendeployeds
 withdrawnFromLockCollection = operaDB.withdrawnfromlocks
 tokensLockedCollection = operaDB.tokenlockeds
-ethReturnedCollection = operaDB.ethreturnds
+rewardsMovedCollection = operaDB.rewardsmoveds
+ethMovedCollection = operaDB.ethmoveds
 
 
-async def getEthBorrowed():
-    tempObject = {}
-    tempList = []
-    for x in ethBorrowedCollection.find():
-        tempObject["borrower"] = x["borrower"]
-        tempObject["transactionHash"] = x["transactionHash"]
-        tempObject["amount"] = x["amount"]
-        tempObject["blocktime"] = x["blocktime"]
-        tempList.append(tempObject.copy())
-    return tempList
-async def getEthReturned():
-    tempObject = {}
-    tempList = []
-    for x in ethReturnedCollection.find():
-        tempObject["borrower"] = x["borrower"]
-        tempObject["transactionHash"] = x["transactionHash"]
-        tempObject["amount"] = x["amount"]
-        tempObject["blocktime"] = x["blocktime"]
-        tempList.append(tempObject.copy())
-    return tempList
-async def getRewardsPaid():
-    tempObject = {}
-    tempList = []
-    for x in rewardsPaidCollection.find():
-        tempObject["receiver"] = x["receiver"]
-        tempObject["amount"] = x["amount"]
-        tempObject["transactionHash"] = x["transactionHash"]
-        tempObject["blocktime"] = x["blocktime"]
-        tempList.append(tempObject.copy())
-    return tempList
-async def getEthLent():
-    tempObject = {}
-    tempList = []
-    for x in ethLentCollection.find():
-        tempObject["lender"] = x["lender"]
-        tempObject["transactionHash"] = x["transactionHash"]
-        tempObject["amount"] = x["amount"]
-        tempObject["blocktime"] = x["blocktime"]
-        tempList.append(tempObject.copy())
-    return tempList
-async def getEthWithdrawn():
-    tempObject = {}
-    tempList = []
-    for x in ethWithdrawnCollection.find():
-        tempObject["lender"] = x["lender"]
-        tempObject["transactionHash"] = x["transactionHash"]
-        tempObject["amount"] = x["amount"]
-        tempObject["blocktime"] = x["blocktime"]
-        tempList.append(tempObject.copy())
-    return tempList
-async def getQueueAdded():
-    tempObject = {}
-    tempList = []
-    for x in queueAddedCollection.find():
-        tempObject["lender"] = x["lender"]
-        tempObject["transactionHash"] = x["transactionHash"]
-        tempObject["amount"] = x["amount"]
-        tempObject["blocktime"] = x["blocktime"]
-        tempObject["position"] = x["position"]
-        tempList.append(tempObject.copy())
-    return tempList
-async def getRewardsRecieved():
-    tempObject = {}
-    tempList = []
-    for x in rewardsRecievedCollection.find():
-        tempObject["sender"] = x["sender"]
-        tempObject["transactionHash"] = x["transactionHash"]
-        tempObject["amount"] = x["amount"]
-        tempObject["blocktime"] = x["blocktime"]
-        tempList.append(tempObject.copy())
-    return tempList
+
 async def getTokensDeployed():
     tempObject = {}
     tempList = []
@@ -124,20 +50,29 @@ async def getTokensLocked():
         tempObject["account"] = x["account"]
         tempList.append(tempObject.copy())
     return tempList
+async def getEthMoved():
+    tempObject = {}
+    tempList = []
+    for x in ethMovedCollection.find():
+        tempObject["account"] = x["account"]
+        tempObject["transactionHash"] = x["transactionHash"]
+        tempObject["amount"] = x["amount"]
+        tempObject["blocktime"] = x["blocktime"]
+        tempObject["code"] = x["code"]
+        tempList.append(tempObject.copy())
+    return tempList
+async def getRewardsMoved():
+    tempObject = {}
+    tempList = []
+    for x in rewardsMovedCollection.find():
+        tempObject["account"] = x["account"]
+        tempObject["transactionHash"] = x["transactionHash"]
+        tempObject["amount"] = x["amount"]
+        tempObject["blocktime"] = x["blocktime"]
+        tempObject["incoming"] = x["incoming"]
+        tempList.append(tempObject.copy())
+    return tempList
 
-
-async def load():
-    await getEthBorrowed()
-    await getRewardsPaid()
-    await getEthLent()
-    await getEthWithdrawn()
-    await getQueueAdded()
-    await getRewardsRecieved()
-    await getTokensDeployed()
-    await getTokensWithdrawnFromLock()
-    await getEthReturned()
-    await getTokensWithdrawnFromLock()
-    await getTokensLocked()
 
 @app.get('/')
 async def root():
@@ -146,47 +81,58 @@ async def root():
 @app.get('/maindata/{account}')
 async def getData(account):
     print(account)
-    revenue = await getRewardsRecieved()
-    ethLent = await getEthLent()
-    ethWithdrawn = await getEthWithdrawn()
+    rewardsMoved = await getRewardsMoved()
+    ethMoved = await getEthMoved()
     totalList = []
     print("printing revenue")
+    for x in rewardsMoved:
+        copied = x.copy()
+        print(copied)
+        if(copied['incoming'] == 1):
+            copied["type"] = "revenue"  
+        else:
+            copied["type"] = "withdrawRev"  
+        totalList.append(copied)
+    for x in ethMoved:
+        copied = x.copy()
+        print(copied)
+        if(copied['code'] == 1):
+            copied["type"] = "lent"
+        elif(copied['code'] == 4):
+            copied["type"] = "withdrawLent"
 
-    for x in revenue:
-        copied = x.copy()
-        copied["type"] = "revenue"
         totalList.append(copied)
-    print("printing eth lent")
-    for x in ethLent:
-        copied = x.copy()
-        copied["type"] = "lent"
-        totalList.append(copied)
-    print("printing withdrawn")
-    for x in ethWithdrawn:
-        copied = x.copy()
-        copied["type"] = "withdrawn"
-        totalList.append(copied)
+
     totalList.sort(key= lambda item:item['blocktime'])
     usersLentEth = 0
+    usersWithdrawnRev = 0
     totalLentEth = 0
     usersRevenue = 0
+
     for x in totalList:
+        if('type' not in x):
+            continue
+        print(x)
         if(x['type']=="lent"):
-            if(x['lender'].lower() == account):
+            if(x['account'].lower() == account):
                 usersLentEth = usersLentEth + x['amount']
             totalLentEth += x['amount']
-        elif(x['type']=="withdrawn"):
-            if(x['lender'].lower() == account):
+        elif(x['type']=="withdrawLent"):
+            if(x['account'].lower() == account):
                 usersLentEth = usersLentEth - x['amount']
             totalLentEth -= x['amount']
         elif(x['type']=="revenue"):
-            usersRevenue = usersRevenue + ( x['amount'] * (usersLentEth/totalLentEth))
+            usersRevenue = usersRevenue + (( x['amount'] * (usersLentEth/totalLentEth)) * 0.7)
+        elif(x['type']=="withdrawRev"):
+            if(x['account'].lower() == account):
+                usersWithdrawnRev = usersWithdrawnRev +  x['amount'] 
     print(f"Total Lent Eth: {totalLentEth}")
     print(f"Users Current Lent Eth: {usersLentEth}")
     print(f"Users Total Revenue: {usersRevenue / 10 ** 18}")
+    print(f"Users Withdrawn Revenue: {usersWithdrawnRev / 10 ** 18}")
 
     
-    return {"usersLentEth":usersLentEth,"totalLentEth":totalLentEth,"usersRevenue":usersRevenue}
+    return {"usersLentEth":usersLentEth,"totalLentEth":totalLentEth,"usersRevenue":usersRevenue, "usersClaimedRevenue":usersWithdrawnRev}
 # @app.get('/{id}')
 # async def root(id : int):
 #     return {"id":id}
