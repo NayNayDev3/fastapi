@@ -127,6 +127,7 @@ async def getData(account):
             if(x['account'].lower() == account):
                 usersLentEth = usersLentEth - x['amount']
             totalLentEth -= x['amount']
+            totalAvailable -= x['amount']
         elif(x['type']=="revenue"):
             usersRevenue = usersRevenue + (( x['amount'] * (usersLentEth/totalLentEth)) * 0.7)
         elif(x['type']=="returnedBorrow"):
@@ -136,6 +137,7 @@ async def getData(account):
         elif(x['type']=="withdrawRev"):
             if(x['account'].lower() == account):
                 usersWithdrawnRev = usersWithdrawnRev +  x['amount'] 
+
     print(f"Total Lent Eth: {totalLentEth}")
     print(f"Users Current Lent Eth: {usersLentEth}")
     print(f"Users Total Revenue: {usersRevenue / 10 ** 18}")
