@@ -122,6 +122,7 @@ async def getData(account):
             if(x['account'].lower() == account):
                 usersLentEth = usersLentEth + x['amount']
             totalLentEth += x['amount']
+            totalAvailable += x['amount']
         elif(x['type']=="withdrawLent"):
             if(x['account'].lower() == account):
                 usersLentEth = usersLentEth - x['amount']
