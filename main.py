@@ -100,6 +100,10 @@ async def getData(account):
             copied["type"] = "lent"
         elif(copied['code'] == 4):
             copied["type"] = "withdrawLent"
+        elif(copied['code'] == 3):
+            copied["type"] = "returnedBorrow"
+        elif(copied['code'] == 2):
+            copied["type"] = "borrow"
 
         totalList.append(copied)
 
@@ -108,6 +112,7 @@ async def getData(account):
     usersWithdrawnRev = 0
     totalLentEth = 0
     usersRevenue = 0
+    totalAvailable = 0
 
     for x in totalList:
         if('type' not in x):
@@ -123,6 +128,10 @@ async def getData(account):
             totalLentEth -= x['amount']
         elif(x['type']=="revenue"):
             usersRevenue = usersRevenue + (( x['amount'] * (usersLentEth/totalLentEth)) * 0.7)
+        elif(x['type']=="returnedBorrow"):
+            totalAvailable = totalAvailable + x['amount']
+        elif(x['type']=="borrow"):
+            totalAvailable = totalAvailable - x['amount']
         elif(x['type']=="withdrawRev"):
             if(x['account'].lower() == account):
                 usersWithdrawnRev = usersWithdrawnRev +  x['amount'] 
@@ -132,7 +141,7 @@ async def getData(account):
     print(f"Users Withdrawn Revenue: {usersWithdrawnRev / 10 ** 18}")
 
     
-    return {"usersLentEth":usersLentEth,"totalLentEth":totalLentEth,"usersRevenue":usersRevenue, "usersClaimedRevenue":usersWithdrawnRev}
+    return {"usersLentEth":usersLentEth,"totalLentEth":totalLentEth,"usersRevenue":usersRevenue, "usersClaimedRevenue":usersWithdrawnRev,"totalAvailable":totalAvailable}
 # @app.get('/{id}')
 # async def root(id : int):
 #     return {"id":id}
