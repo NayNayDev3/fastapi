@@ -28,6 +28,8 @@ async def getTokensDeployed():
         tempObject["token"] = x["token"]
         tempObject["amount"] = x["amountEth"]
         tempObject["blocktime"] = x["blocktime"]
+        tempObject["name"] = x["name"]
+        tempObject["symbol"] = x["symbol"]
         tempList.append(tempObject.copy())
     return tempList
 async def getTokensWithdrawnFromLock():
@@ -83,6 +85,7 @@ async def getData(account):
     print(account)
     rewardsMoved = await getRewardsMoved()
     ethMoved = await getEthMoved()
+    deployedTokens = await getTokensDeployed()
     totalList = []
     print("printing revenue")
     for x in rewardsMoved:
@@ -129,7 +132,8 @@ async def getData(account):
             totalLentEth -= x['amount']
             totalAvailable -= x['amount']
         elif(x['type']=="revenue"):
-            usersRevenue = usersRevenue + (( x['amount'] * (usersLentEth/totalLentEth)) * 0.7)
+            if(totalLentEth!=0):
+                usersRevenue = usersRevenue + (( x['amount'] * (usersLentEth/totalLentEth)) * 0.7)
         elif(x['type']=="returnedBorrow"):
             totalAvailable = totalAvailable + x['amount']
         elif(x['type']=="borrow"):
@@ -143,8 +147,8 @@ async def getData(account):
     print(f"Users Total Revenue: {usersRevenue / 10 ** 18}")
     print(f"Users Withdrawn Revenue: {usersWithdrawnRev / 10 ** 18}")
 
-    
-    return {"usersLentEth":usersLentEth,"totalLentEth":totalLentEth,"usersRevenue":usersRevenue, "usersClaimedRevenue":usersWithdrawnRev,"totalAvailable":totalAvailable}
+    deployedTokens.reverse()
+    return {"deployedTokens":deployedTokens,"usersLentEth":usersLentEth,"totalLentEth":totalLentEth,"usersRevenue":usersRevenue, "usersClaimedRevenue":usersWithdrawnRev,"totalAvailable":totalAvailable}
 # @app.get('/{id}')
 # async def root(id : int):
 #     return {"id":id}
