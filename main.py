@@ -82,7 +82,7 @@ async def root():
     return {"id":0}
 @app.get('/maindata/{account}')
 async def getData(account):
-    print(account)
+    currentTime = int(time.time())
     rewardsMoved = await getRewardsMoved()
     ethMoved = await getEthMoved()
     deployedTokens = await getTokensDeployed()
@@ -90,7 +90,7 @@ async def getData(account):
     print("printing revenue")
     for x in rewardsMoved:
         copied = x.copy()
-        print(copied)
+
         if(copied['incoming'] == 1):
             copied["type"] = "revenue"  
         else:
@@ -98,7 +98,7 @@ async def getData(account):
         totalList.append(copied)
     for x in ethMoved:
         copied = x.copy()
-        print(copied)
+
         if(copied['code'] == 1):
             copied["type"] = "lent"
         elif(copied['code'] == 4):
@@ -116,11 +116,11 @@ async def getData(account):
     totalLentEth = 0
     usersRevenue = 0
     totalAvailable = 0
-
+    dailyRevenue = 0
     for x in totalList:
         if('type' not in x):
             continue
-        print(x)
+
         if(x['type']=="lent"):
             if(x['account'].lower() == account):
                 usersLentEth = usersLentEth + x['amount']
@@ -134,6 +134,8 @@ async def getData(account):
         elif(x['type']=="revenue"):
             if(totalLentEth!=0):
                 usersRevenue = usersRevenue + (( x['amount'] * (usersLentEth/totalLentEth)) * 0.7)
+                if(x['account'].lower() == account and x["blocktime"] > currentTime - 86400):
+                    dailyRevenue = dailyRevenue + x['amount']
         elif(x['type']=="returnedBorrow"):
             totalAvailable = totalAvailable + x['amount']
         elif(x['type']=="borrow"):
@@ -148,7 +150,7 @@ async def getData(account):
     print(f"Users Withdrawn Revenue: {usersWithdrawnRev / 10 ** 18}")
 
     deployedTokens.reverse()
-    return {"deployedTokens":deployedTokens,"usersLentEth":usersLentEth,"totalLentEth":totalLentEth,"usersRevenue":usersRevenue, "usersClaimedRevenue":usersWithdrawnRev,"totalAvailable":totalAvailable}
+    return {"dailyRevenue":dailyRevenue,"deployedTokens":deployedTokens,"usersLentEth":usersLentEth,"totalLentEth":totalLentEth,"usersRevenue":usersRevenue, "usersClaimedRevenue":usersWithdrawnRev,"totalAvailable":totalAvailable}
 # @app.get('/{id}')
 # async def root(id : int):
 #     return {"id":id}
