@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pymongo import MongoClient
-import time
+# import time
 client = MongoClient("mongodb+srv://basicUser:fO2yUzuLrcnbxOyW@mythcity.kcmvkv5.mongodb.net/")
 
 app = FastAPI()
@@ -82,7 +82,8 @@ async def root():
     return {"id":0}
 @app.get('/maindata/{account}')
 async def getData(account):
-    currentTime = int(time.time())
+    # currentTime = int(time.time())
+    currentTime = 1690506094
     rewardsMoved = await getRewardsMoved()
     ethMoved = await getEthMoved()
     deployedTokens = await getTokensDeployed()
