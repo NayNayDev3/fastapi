@@ -135,8 +135,8 @@ async def getData(account):
         elif(x['type']=="revenue"):
             if(totalLentEth!=0):
                 usersRevenue = usersRevenue + (( x['amount'] * (usersLentEth/totalLentEth)) * 0.7)
-                # if(x['account'].lower() == account and x["blocktime"] > currentTime - 86400):
-        #         #     dailyRevenue = dailyRevenue + x['amount']
+                if(x['account'].lower() == account and x["blocktime"] > currentTime - 86400):
+                    dailyRevenue = dailyRevenue + x['amount']
         elif(x['type']=="returnedBorrow"):
             totalAvailable = totalAvailable + x['amount']
         elif(x['type']=="borrow"):
