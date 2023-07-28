@@ -118,32 +118,32 @@ async def getData(account):
     usersRevenue = 0
     totalAvailable = 0
     dailyRevenue = 0
-    # for x in totalList:
-    #     if('type' not in x):
-    #         continue
+    for x in totalList:
+        if('type' not in x):
+            continue
 
-    #     if(x['type']=="lent"):
-    #         if(x['account'].lower() == account):
-    #             usersLentEth = usersLentEth + x['amount']
-    #         totalLentEth += x['amount']
-    #         totalAvailable += x['amount']
-    #     elif(x['type']=="withdrawLent"):
-    #         if(x['account'].lower() == account):
-    #             usersLentEth = usersLentEth - x['amount']
-    #         totalLentEth -= x['amount']
-    #         totalAvailable -= x['amount']
-    #     elif(x['type']=="revenue"):
-    #         if(totalLentEth!=0):
-    #             usersRevenue = usersRevenue + (( x['amount'] * (usersLentEth/totalLentEth)) * 0.7)
-    #             # if(x['account'].lower() == account and x["blocktime"] > currentTime - 86400):
-    #             #     dailyRevenue = dailyRevenue + x['amount']
-    #     elif(x['type']=="returnedBorrow"):
-    #         totalAvailable = totalAvailable + x['amount']
-    #     elif(x['type']=="borrow"):
-    #         totalAvailable = totalAvailable - x['amount']
-    #     elif(x['type']=="withdrawRev"):
-    #         if(x['account'].lower() == account):
-    #             usersWithdrawnRev = usersWithdrawnRev +  x['amount'] 
+        if(x['type']=="lent"):
+            if(x['account'].lower() == account):
+                usersLentEth = usersLentEth + x['amount']
+            totalLentEth += x['amount']
+            totalAvailable += x['amount']
+        # elif(x['type']=="withdrawLent"):
+        #     if(x['account'].lower() == account):
+        #         usersLentEth = usersLentEth - x['amount']
+        #     totalLentEth -= x['amount']
+        #     totalAvailable -= x['amount']
+        # elif(x['type']=="revenue"):
+        #     if(totalLentEth!=0):
+        #         usersRevenue = usersRevenue + (( x['amount'] * (usersLentEth/totalLentEth)) * 0.7)
+        #         # if(x['account'].lower() == account and x["blocktime"] > currentTime - 86400):
+        #         #     dailyRevenue = dailyRevenue + x['amount']
+        # elif(x['type']=="returnedBorrow"):
+        #     totalAvailable = totalAvailable + x['amount']
+        # elif(x['type']=="borrow"):
+        #     totalAvailable = totalAvailable - x['amount']
+        # elif(x['type']=="withdrawRev"):
+        #     if(x['account'].lower() == account):
+        #         usersWithdrawnRev = usersWithdrawnRev +  x['amount'] 
 
     # print(f"Total Lent Eth: {totalLentEth}")
     # print(f"Users Current Lent Eth: {usersLentEth}")
