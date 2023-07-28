@@ -83,74 +83,74 @@ async def root():
 @app.get('/maindata/{account}')
 async def getData(account):
     # currentTime = int(time.time())
-    currentTime = 1690506094
-    rewardsMoved = await getRewardsMoved()
-    ethMoved = await getEthMoved()
-    deployedTokens = await getTokensDeployed()
-    totalList = []
-    print("printing revenue")
-    for x in rewardsMoved:
-        copied = x.copy()
+    # currentTime = 1690506094
+    # rewardsMoved = await getRewardsMoved()
+    # ethMoved = await getEthMoved()
+    # deployedTokens = await getTokensDeployed()
+    # totalList = []
+    # print("printing revenue")
+    # for x in rewardsMoved:
+    #     copied = x.copy()
 
-        if(copied['incoming'] == 1):
-            copied["type"] = "revenue"  
-        else:
-            copied["type"] = "withdrawRev"  
-        totalList.append(copied)
-    for x in ethMoved:
-        copied = x.copy()
+    #     if(copied['incoming'] == 1):
+    #         copied["type"] = "revenue"  
+    #     else:
+    #         copied["type"] = "withdrawRev"  
+    #     totalList.append(copied)
+    # for x in ethMoved:
+    #     copied = x.copy()
 
-        if(copied['code'] == 1):
-            copied["type"] = "lent"
-        elif(copied['code'] == 4):
-            copied["type"] = "withdrawLent"
-        elif(copied['code'] == 3):
-            copied["type"] = "returnedBorrow"
-        elif(copied['code'] == 2):
-            copied["type"] = "borrow"
+    #     if(copied['code'] == 1):
+    #         copied["type"] = "lent"
+    #     elif(copied['code'] == 4):
+    #         copied["type"] = "withdrawLent"
+    #     elif(copied['code'] == 3):
+    #         copied["type"] = "returnedBorrow"
+    #     elif(copied['code'] == 2):
+    #         copied["type"] = "borrow"
 
-        totalList.append(copied)
+    #     totalList.append(copied)
 
-    totalList.sort(key= lambda item:item['blocktime'])
+    # totalList.sort(key= lambda item:item['blocktime'])
     usersLentEth = 0
     usersWithdrawnRev = 0
     totalLentEth = 0
     usersRevenue = 0
     totalAvailable = 0
     dailyRevenue = 0
-    for x in totalList:
-        if('type' not in x):
-            continue
+    # for x in totalList:
+    #     if('type' not in x):
+    #         continue
 
-        if(x['type']=="lent"):
-            if(x['account'].lower() == account):
-                usersLentEth = usersLentEth + x['amount']
-            totalLentEth += x['amount']
-            totalAvailable += x['amount']
-        elif(x['type']=="withdrawLent"):
-            if(x['account'].lower() == account):
-                usersLentEth = usersLentEth - x['amount']
-            totalLentEth -= x['amount']
-            totalAvailable -= x['amount']
-        elif(x['type']=="revenue"):
-            if(totalLentEth!=0):
-                usersRevenue = usersRevenue + (( x['amount'] * (usersLentEth/totalLentEth)) * 0.7)
-                if(x['account'].lower() == account and x["blocktime"] > currentTime - 86400):
-                    dailyRevenue = dailyRevenue + x['amount']
-        elif(x['type']=="returnedBorrow"):
-            totalAvailable = totalAvailable + x['amount']
-        elif(x['type']=="borrow"):
-            totalAvailable = totalAvailable - x['amount']
-        elif(x['type']=="withdrawRev"):
-            if(x['account'].lower() == account):
-                usersWithdrawnRev = usersWithdrawnRev +  x['amount'] 
+    #     if(x['type']=="lent"):
+    #         if(x['account'].lower() == account):
+    #             usersLentEth = usersLentEth + x['amount']
+    #         totalLentEth += x['amount']
+    #         totalAvailable += x['amount']
+    #     elif(x['type']=="withdrawLent"):
+    #         if(x['account'].lower() == account):
+    #             usersLentEth = usersLentEth - x['amount']
+    #         totalLentEth -= x['amount']
+    #         totalAvailable -= x['amount']
+    #     elif(x['type']=="revenue"):
+    #         if(totalLentEth!=0):
+    #             usersRevenue = usersRevenue + (( x['amount'] * (usersLentEth/totalLentEth)) * 0.7)
+    #             if(x['account'].lower() == account and x["blocktime"] > currentTime - 86400):
+    #                 dailyRevenue = dailyRevenue + x['amount']
+    #     elif(x['type']=="returnedBorrow"):
+    #         totalAvailable = totalAvailable + x['amount']
+    #     elif(x['type']=="borrow"):
+    #         totalAvailable = totalAvailable - x['amount']
+    #     elif(x['type']=="withdrawRev"):
+    #         if(x['account'].lower() == account):
+    #             usersWithdrawnRev = usersWithdrawnRev +  x['amount'] 
 
-    print(f"Total Lent Eth: {totalLentEth}")
-    print(f"Users Current Lent Eth: {usersLentEth}")
-    print(f"Users Total Revenue: {usersRevenue / 10 ** 18}")
-    print(f"Users Withdrawn Revenue: {usersWithdrawnRev / 10 ** 18}")
+    # print(f"Total Lent Eth: {totalLentEth}")
+    # print(f"Users Current Lent Eth: {usersLentEth}")
+    # print(f"Users Total Revenue: {usersRevenue / 10 ** 18}")
+    # print(f"Users Withdrawn Revenue: {usersWithdrawnRev / 10 ** 18}")
 
-    deployedTokens.reverse()
+    # deployedTokens.reverse()
     return {"dailyRevenue":dailyRevenue,"deployedTokens":deployedTokens,"usersLentEth":usersLentEth,"totalLentEth":totalLentEth,"usersRevenue":usersRevenue, "usersClaimedRevenue":usersWithdrawnRev,"totalAvailable":totalAvailable}
 # @app.get('/{id}')
 # async def root(id : int):
