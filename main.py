@@ -16,6 +16,7 @@ withdrawnFromLockCollection = operaDB.withdrawnfromlocks
 tokensLockedCollection = operaDB.tokenlockeds
 rewardsMovedCollection = operaDB.rewardsmoveds
 ethMovedCollection = operaDB.ethmoveds
+voteStateChangedCollection = operaDB.votestatechangeds
 
 
 
@@ -30,6 +31,7 @@ async def getTokensDeployed():
         tempObject["blocktime"] = x["blocktime"]
         tempObject["name"] = x["name"]
         tempObject["symbol"] = x["symbol"]
+        tempObject["tokenCount"] = x["tokenCount"]
         tempList.append(tempObject.copy())
     return tempList
 async def getTokensWithdrawnFromLock():
@@ -74,6 +76,17 @@ async def getRewardsMoved():
         tempObject["incoming"] = x["incoming"]
         tempList.append(tempObject.copy())
     return tempList
+async def getVoteStateChanged():
+    tempObject = {}
+    tempList = []
+    for x in voteStateChangedCollection.find():
+        tempObject["tokenId"] = x["tokenId"]
+        tempObject["transactionHash"] = x["transactionHash"]
+        tempObject["lobbyId"] = x["lobbyId"]
+        tempObject["blocktime"] = x["blocktime"]
+        tempObject["state"] = x["state"]
+        tempList.append(tempObject.copy())
+    return tempList
 
 
 @app.get('/')
@@ -83,11 +96,20 @@ async def root():
 @app.get('/maindata/{account}')
 async def getData(account):
     currentTime = int(time.time())
-    # currentTime = 1690506094
     rewardsMoved = await getRewardsMoved()
     ethMoved = await getEthMoved()
     deployedTokens = await getTokensDeployed()
+    voteStates = await getVoteStateChanged()
+    print(voteStates)
+    voteStates.sort(key= lambda item:item['blocktime'])
     totalList = []
+    tempVoteList = {}
+    for x in voteStates:
+        tempVoteList[x["tokenId"]] = {"blocktime":x["blocktime"],"state":x["state"],"lobbyId":x["lobbyId"]}
+        if(x["tokenId"] == 0 or x["tokenId"] == 1):
+            tempVoteList[x["tokenId"]] = {"blocktime":x["blocktime"],"state":4 ,"lobbyId":1}
+        
+    print(tempVoteList)
     print("printing revenue")
     for x in rewardsMoved:
         copied = x.copy()
@@ -119,9 +141,10 @@ async def getData(account):
     totalAvailable = 0
     dailyRevenue = 0
     for x in totalList:
+
         if('type' not in x):
             continue
-
+        # print(f"current time: {currentTime} - {currentTime - 8640} - item time - {x['blocktime']}")
         if(x['type']=="lent"):
             if(x['account'].lower() == account):
                 usersLentEth = usersLentEth + x['amount']
@@ -145,13 +168,13 @@ async def getData(account):
             if(x['account'].lower() == account):
                 usersWithdrawnRev = usersWithdrawnRev +  x['amount'] 
 
-    # print(f"Total Lent Eth: {totalLentEth}")
-    # print(f"Users Current Lent Eth: {usersLentEth}")
-    # print(f"Users Total Revenue: {usersRevenue / 10 ** 18}")
-    # print(f"Users Withdrawn Revenue: {usersWithdrawnRev / 10 ** 18}")
-
-    # deployedTokens.reverse()
-    return {"dailyRevenue":dailyRevenue,"deployedTokens":deployedTokens,"usersLentEth":usersLentEth,"totalLentEth":totalLentEth,"usersRevenue":usersRevenue, "usersClaimedRevenue":usersWithdrawnRev,"totalAvailable":totalAvailable}
+    print(f"Total Lent Eth: {totalLentEth}")
+    print(f"Users Current Lent Eth: {usersLentEth}")
+    print(f"Users Total Revenue: {usersRevenue / 10 ** 18}")
+    print(f"Users Withdrawn Revenue: {usersWithdrawnRev / 10 ** 18}")
+    print(dailyRevenue)
+    deployedTokens.reverse()
+    return {"tempVoteList":tempVoteList,"dailyRevenue":dailyRevenue,"deployedTokens":deployedTokens,"usersLentEth":usersLentEth,"totalLentEth":totalLentEth,"usersRevenue":usersRevenue, "usersClaimedRevenue":usersWithdrawnRev,"totalAvailable":totalAvailable}
 # @app.get('/{id}')
 # async def root(id : int):
 #     return {"id":id}
