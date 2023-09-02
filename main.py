@@ -19,7 +19,6 @@ ethMovedCollection = operaDB.ethmoveds
 voteStateChangedCollection = operaDB.votestatechangeds
 
 
-
 async def getTokensDeployed():
     tempObject = {}
     tempList = []
@@ -100,7 +99,7 @@ async def getData(account):
     ethMoved = await getEthMoved()
     deployedTokens = await getTokensDeployed()
     voteStates = await getVoteStateChanged()
-    print(voteStates)
+    # print(voteStates)
     voteStates.sort(key= lambda item:item['blocktime'])
     totalList = []
     tempVoteList = {}
@@ -109,8 +108,8 @@ async def getData(account):
         if(x["tokenId"] == 0 or x["tokenId"] == 1):
             tempVoteList[x["tokenId"]] = {"blocktime":x["blocktime"],"state":4 ,"lobbyId":1}
         
-    print(tempVoteList)
-    print("printing revenue")
+    # print(tempVoteList)
+    # print("printing revenue")
     for x in rewardsMoved:
         copied = x.copy()
 
@@ -140,11 +139,12 @@ async def getData(account):
     usersRevenue = 0
     totalAvailable = 0
     dailyRevenue = 0
+    totalRevenue = 0
     for x in totalList:
 
         if('type' not in x):
             continue
-        # print(f"current time: {currentTime} - {currentTime - 8640} - item time - {x['blocktime']}")
+
         if(x['type']=="lent"):
             if(x['account'].lower() == account):
                 usersLentEth = usersLentEth + x['amount']
@@ -157,8 +157,9 @@ async def getData(account):
             totalAvailable -= x['amount']
         elif(x['type']=="revenue"):
             if(totalLentEth!=0):
-                usersRevenue = usersRevenue + (( x['amount'] * (usersLentEth/totalLentEth)) * 0.7)
-                if(x['account'].lower() == account and x["blocktime"] > currentTime - 86400):
+                totalRevenue = totalRevenue + x['amount'] 
+                if(x["blocktime"] > currentTime - 86400):
+                    # print(f"current time: {currentTime - x['blocktime']} ")
                     dailyRevenue = dailyRevenue + x['amount']
         elif(x['type']=="returnedBorrow"):
             totalAvailable = totalAvailable + x['amount']
@@ -168,13 +169,14 @@ async def getData(account):
             if(x['account'].lower() == account):
                 usersWithdrawnRev = usersWithdrawnRev +  x['amount'] 
 
-    print(f"Total Lent Eth: {totalLentEth}")
-    print(f"Users Current Lent Eth: {usersLentEth}")
-    print(f"Users Total Revenue: {usersRevenue / 10 ** 18}")
-    print(f"Users Withdrawn Revenue: {usersWithdrawnRev / 10 ** 18}")
-    print(dailyRevenue)
+    # print(f"Total Lent Eth: {totalLentEth}")
+    # print(f"Users Current Lent Eth: {usersLentEth}")
+    # print(f"Users Total Revenue: {usersRevenue / 10 ** 18}")
+    # print(f"Users Withdrawn Revenue: {usersWithdrawnRev / 10 ** 18}")
+    # print(dailyRevenue)
+    # print(totalRevenue)
     deployedTokens.reverse()
-    return {"tempVoteList":tempVoteList,"dailyRevenue":dailyRevenue,"deployedTokens":deployedTokens,"usersLentEth":usersLentEth,"totalLentEth":totalLentEth,"usersRevenue":usersRevenue, "usersClaimedRevenue":usersWithdrawnRev,"totalAvailable":totalAvailable}
+    return {"totalRevenue":totalRevenue,"tempVoteList":tempVoteList,"dailyRevenue":dailyRevenue,"deployedTokens":deployedTokens,"usersLentEth":usersLentEth,"totalLentEth":totalLentEth,"usersRevenue":usersRevenue, "usersClaimedRevenue":usersWithdrawnRev,"totalAvailable":totalAvailable}
 # @app.get('/{id}')
 # async def root(id : int):
 #     return {"id":id}
